@@ -1,8 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const process = require('process');
+
 const { userRouter } = require('./routes/users');
 const { cardsRouter } = require('./routes/cards');
+const ERROR_CODES = require('./utils/errorCodes');
 
 const app = express();
 
@@ -18,6 +21,11 @@ app.use((req, res, next) => {
 });
 app.use('/', userRouter);
 app.use('/', cardsRouter);
+app.use((req, res) => {
+  res.status(ERROR_CODES[404]).send({
+    message: 'Невалидный роут',
+  });
+});
 
 const { PORT = 3000 } = process.env;
 

@@ -17,15 +17,21 @@ const getUser = (req, res) => {
   User.findById(req.params.userId).orFail()
     .then((user) => res.send({ data: user }))
     .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(ERROR_CODES[400]).send({
+          message: 'Переданы некорректные данные при получении пользователя',
+        });
+        return;
+      }
       if (err.name === 'DocumentNotFoundError') {
         res.status(ERROR_CODES[404]).send({
           message: 'Пользователь по указанному _id не найден',
         });
-      } else {
-        res.status(ERROR_CODES[500]).send({
-          message: 'На сервере произошла ошибка',
-        });
+        return;
       }
+      res.status(ERROR_CODES[500]).send({
+        message: 'На сервере произошла ошибка',
+      });
     });
 };
 

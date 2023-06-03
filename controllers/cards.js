@@ -36,15 +36,21 @@ const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId).orFail()
     .then(() => res.send({ message: 'Пост удален' }))
     .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(ERROR_CODES[400]).send({
+          message: 'Переданы некорректные данные при удаления карточки',
+        });
+        return;
+      }
       if (err.name === 'DocumentNotFoundError') {
         res.status(ERROR_CODES[404]).send({
           message: 'Карточка с указанным _id не найдена.',
         });
-      } else {
-        res.status(ERROR_CODES[500]).send({
-          message: 'На сервере произошла ошибка',
-        });
+        return;
       }
+      res.status(ERROR_CODES[500]).send({
+        message: 'На сервере произошла ошибка',
+      });
     });
 };
 
