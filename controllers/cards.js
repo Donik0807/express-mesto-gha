@@ -1,12 +1,12 @@
 const Card = require('../models/cards');
-const ERROR_CODES = require('../utils/errorCodes');
+const { INVALID_DATA_CODE, NOT_FOUND_CODE, DEFAULT_ERROR_CODE } = require('../utils/errorCodes');
 
 const getCards = (req, res) => {
   Card.find({})
     .populate(['owner', 'likes'])
     .then((cards) => res.send(cards))
     .catch(() => {
-      res.status(ERROR_CODES[500]).send({
+      res.status(DEFAULT_ERROR_CODE).send({
         message: 'На сервере произошла ошибка',
       });
     });
@@ -21,11 +21,11 @@ const createCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODES[400]).send({
+        res.status(INVALID_DATA_CODE).send({
           message: ' Переданы некорректные данные при создании карточки',
         });
       } else {
-        res.status(ERROR_CODES[500]).send({
+        res.status(DEFAULT_ERROR_CODE).send({
           message: 'На сервере произошла ошибка',
         });
       }
@@ -37,18 +37,18 @@ const deleteCard = (req, res) => {
     .then(() => res.send({ message: 'Пост удален' }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODES[400]).send({
+        res.status(INVALID_DATA_CODE).send({
           message: 'Переданы некорректные данные при удаления карточки',
         });
         return;
       }
       if (err.name === 'DocumentNotFoundError') {
-        res.status(ERROR_CODES[404]).send({
+        res.status(NOT_FOUND_CODE).send({
           message: 'Карточка с указанным _id не найдена.',
         });
         return;
       }
-      res.status(ERROR_CODES[500]).send({
+      res.status(DEFAULT_ERROR_CODE).send({
         message: 'На сервере произошла ошибка',
       });
     });
@@ -60,24 +60,23 @@ const likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     {
       new: true,
-      runValidators: true,
     },
   ).populate(['owner', 'likes']).orFail()
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        res.status(ERROR_CODES[400]).send({
+      if (err.name === 'CastError') {
+        res.status(INVALID_DATA_CODE).send({
           message: 'Переданы некорректные данные для постановки лайка',
         });
         return;
       }
       if (err.name === 'DocumentNotFoundError') {
-        res.status(ERROR_CODES[404]).send({
+        res.status(NOT_FOUND_CODE).send({
           message: 'Карточка с указанным _id не найдена.',
         });
         return;
       }
-      res.status(ERROR_CODES[500]).send({
+      res.status(DEFAULT_ERROR_CODE).send({
         message: 'На сервере произошла ошибка',
       });
     });
@@ -89,24 +88,23 @@ const dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     {
       new: true,
-      runValidators: true,
     },
   ).populate(['owner', 'likes']).orFail()
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
-        res.status(ERROR_CODES[400]).send({
+      if (err.name === 'CastError') {
+        res.status(INVALID_DATA_CODE).send({
           message: 'Переданы некорректные данные для постановки лайка',
         });
         return;
       }
       if (err.name === 'DocumentNotFoundError') {
-        res.status(ERROR_CODES[404]).send({
+        res.status(NOT_FOUND_CODE).send({
           message: 'Карточка с указанным _id не найдена.',
         });
         return;
       }
-      res.status(ERROR_CODES[500]).send({
+      res.status(DEFAULT_ERROR_CODE).send({
         message: 'На сервере произошла ошибка',
       });
     });

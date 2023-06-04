@@ -1,7 +1,7 @@
 const ERROR_CODES = {
-  400: 400,
-  404: 404,
-  500: 500,
+  INVALID_DATA_CODE: 400,
+  NOT_FOUND_CODE: 404,
+  DEFAULT_ERROR_CODE: 500,
 };
 
 module.exports = ERROR_CODES;
