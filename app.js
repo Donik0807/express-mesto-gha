@@ -5,7 +5,7 @@ const process = require('process');
 
 const { userRouter } = require('./routes/users');
 const { cardsRouter } = require('./routes/cards');
-const ERROR_CODES = require('./utils/errorCodes');
+const { NOT_FOUND_CODE } = require('./utils/errorCodes');
 
 const app = express();
 
@@ -22,7 +22,7 @@ app.use((req, res, next) => {
 app.use('/', userRouter);
 app.use('/', cardsRouter);
 app.use((req, res) => {
-  res.status(ERROR_CODES[404]).send({
+  res.status(NOT_FOUND_CODE).send({
     message: 'Невалидный роут',
   });
 });
