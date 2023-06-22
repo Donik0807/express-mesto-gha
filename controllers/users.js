@@ -30,21 +30,12 @@ const getUser = (req, res, next) => {
 };
 
 const createUser = (req, res, next) => {
-  const {
-    name,
-    about,
-    avatar,
-    email,
-    password,
-  } = req.body;
+  const { password, ...rest } = req.body;
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
-      name,
-      about,
-      avatar,
-      email,
+      ...rest,
       password: hash,
-    }))
+    })).select('-password')
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       let customError = err;
