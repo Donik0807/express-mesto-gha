@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const urlExpression = require('../utils/urlExpression');
 
 const cardsSchema = mongoose.Schema({
   name: {
@@ -10,6 +11,11 @@ const cardsSchema = mongoose.Schema({
   link: {
     type: String,
     required: true,
+    validate: {
+      validator(v) {
+        return urlExpression.test(v);
+      },
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,

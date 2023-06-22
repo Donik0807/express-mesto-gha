@@ -1,18 +1,16 @@
 const Card = require('../models/cards');
-const { INVALID_DATA_CODE, NOT_FOUND_CODE, DEFAULT_ERROR_CODE } = require('../utils/errorCodes');
+const ForbiddenError = require('../utils/ForbiddenError');
+const InvalidDataError = require('../utils/InvalidDataError');
+const NotFoundError = require('../utils/NotFoundError');
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .populate(['owner', 'likes'])
     .then((cards) => res.send(cards))
-    .catch(() => {
-      res.status(DEFAULT_ERROR_CODE).send({
-        message: 'На сервере произошла ошибка',
-      });
-    });
+    .catch(next);
 };
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => Card.findById(card._id).populate('owner'))
@@ -20,41 +18,40 @@ const createCard = (req, res) => {
       res.send(populatedCard);
     })
     .catch((err) => {
+      let customError = err;
       if (err.name === 'ValidationError') {
-        res.status(INVALID_DATA_CODE).send({
-          message: ' Переданы некорректные данные при создании карточки',
-        });
-      } else {
-        res.status(DEFAULT_ERROR_CODE).send({
-          message: 'На сервере произошла ошибка',
-        });
+        customError = new InvalidDataError('Переданы некорректные данные при создании карточки');
       }
+      next(customError);
     });
 };
 
-const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId).orFail()
-    .then(() => res.send({ message: 'Пост удален' }))
+const deleteCard = (req, res, next) => {
+  const { cardId } = req.params;
+  Card.findById(cardId).orFail()
+    .then((card) => {
+      if (card.owner.toString() === req.user._id) {
+        return card.deleteOne().then(() => {
+          res.send({ message: 'Пост удален' });
+        });
+      }
+      return Promise.reject(new ForbiddenError('Нельзя удалить чужую карточку'));
+    })
     .catch((err) => {
+      let customError = err;
       if (err.name === 'CastError') {
-        res.status(INVALID_DATA_CODE).send({
-          message: 'Переданы некорректные данные при удаления карточки',
-        });
-        return;
+        customError = new InvalidDataError('Переданы некорректные данные при удаления карточки');
       }
+
       if (err.name === 'DocumentNotFoundError') {
-        res.status(NOT_FOUND_CODE).send({
-          message: 'Карточка с указанным _id не найдена.',
-        });
-        return;
+        customError = new NotFoundError('Карточка с указанным _id не найдена.');
       }
-      res.status(DEFAULT_ERROR_CODE).send({
-        message: 'На сервере произошла ошибка',
-      });
+
+      next(customError);
     });
 };
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -64,25 +61,18 @@ const likeCard = (req, res) => {
   ).populate(['owner', 'likes']).orFail()
     .then((card) => res.send(card))
     .catch((err) => {
+      let customError = err;
       if (err.name === 'CastError') {
-        res.status(INVALID_DATA_CODE).send({
-          message: 'Переданы некорректные данные для постановки лайка',
-        });
-        return;
+        customError = new InvalidDataError('Переданы некорректные данные для постановке лайка');
       }
       if (err.name === 'DocumentNotFoundError') {
-        res.status(NOT_FOUND_CODE).send({
-          message: 'Карточка с указанным _id не найдена.',
-        });
-        return;
+        customError = new NotFoundError('Карточка не найдена');
       }
-      res.status(DEFAULT_ERROR_CODE).send({
-        message: 'На сервере произошла ошибка',
-      });
+      next(customError);
     });
 };
 
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -92,21 +82,14 @@ const dislikeCard = (req, res) => {
   ).populate(['owner', 'likes']).orFail()
     .then((card) => res.send(card))
     .catch((err) => {
+      let customError = err;
       if (err.name === 'CastError') {
-        res.status(INVALID_DATA_CODE).send({
-          message: 'Переданы некорректные данные для постановки лайка',
-        });
-        return;
+        customError = new InvalidDataError('Переданы некорректные данные для постановке лайка');
       }
       if (err.name === 'DocumentNotFoundError') {
-        res.status(NOT_FOUND_CODE).send({
-          message: 'Карточка с указанным _id не найдена.',
-        });
-        return;
+        customError = new NotFoundError('Карточка не найдена');
       }
-      res.status(DEFAULT_ERROR_CODE).send({
-        message: 'На сервере произошла ошибка',
-      });
+      next(customError);
     });
 };
 
