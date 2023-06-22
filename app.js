@@ -17,8 +17,8 @@ const app = express();
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
 app.use(bodyParser.json());
-app.use('/signin', celebrate(loginValidator), login);
-app.use('/signup', celebrate(registerValidator), createUser);
+app.post('/signin', celebrate(loginValidator), login);
+app.post('/signup', celebrate(registerValidator), createUser);
 app.use(auth);
 app.use('/', userRouter);
 app.use('/', cardsRouter);

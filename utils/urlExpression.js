@@ -1,3 +1,3 @@
-const urlExpression = /^(https?:\/\/)?(www\.)?[\w\-._~:/?#[\]@!$&'()*+,;=]+(#\w*)?$/;
+const urlExpression = /\bhttps?:\/\/(?:www\.)?[\w-]+(?:\.[\w-]+)+\S*/;
 
 module.exports = urlExpression;
