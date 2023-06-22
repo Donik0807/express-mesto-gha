@@ -30,12 +30,15 @@ const getUser = (req, res, next) => {
 };
 
 const createUser = (req, res, next) => {
-  const { password, ...rest } = req.body;
-  bcrypt.hash(password, 10)
-    .then((hash) => User.create({
-      ...rest,
-      password: hash,
-    }))
+  const { password, email } = req.body;
+  User.findOne({ email }).then((user) => {
+    if (user) {
+      return Promise.reject(new ConflictError('Пользователь с таким email уже существует'));
+    }
+    return user;
+  })
+    .then(() => bcrypt.hash(password, 10))
+    .then((hash) => User.create({ ...req.body, password: hash }))
     .then((user) => {
       const { _doc } = user;
       const { password: _, ...userData } = _doc;
@@ -44,7 +47,7 @@ const createUser = (req, res, next) => {
     .catch((err) => {
       let customError = err;
       if (err.name === 'ValidationError') {
-        customError = new ConflictError('Пользователь с таким email уже существует');
+        customError = new InvalidDataError('Переданы неверные данные');
       }
       next(customError);
     });
