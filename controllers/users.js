@@ -35,8 +35,12 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       ...rest,
       password: hash,
-    })).select('-password')
-    .then((user) => res.send({ data: user }))
+    }))
+    .then((user) => {
+      const { _doc } = user;
+      const { password: _, ...userData } = _doc;
+      res.send({ data: userData });
+    })
     .catch((err) => {
       let customError = err;
       if (err.name === 'ValidationError') {
