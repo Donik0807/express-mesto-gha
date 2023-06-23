@@ -1,13 +1,11 @@
 const jsonwebtoken = require('jsonwebtoken');
-const { AUTH_ERROR_CODE } = require('../utils/errorCodes');
+const AuthError = require('../utils/AuthError');
 
 const auth = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    res.status(AUTH_ERROR_CODE).send({
-      message: 'Необходима авторизация',
-    });
+    next(new AuthError('Необходима авторизация'));
   }
 
   const token = authorization.replace('Bearer ', '');
@@ -16,9 +14,7 @@ const auth = (req, res, next) => {
   try {
     payload = jsonwebtoken.verify(token, 'some-secret-key');
   } catch (err) {
-    res.status(AUTH_ERROR_CODE).send({
-      message: 'Необходима авторизация',
-    });
+    next(new AuthError('Необходима авторизация'));
   }
   req.user = payload;
   next();

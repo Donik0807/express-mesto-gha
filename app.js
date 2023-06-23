@@ -6,11 +6,11 @@ const { celebrate, errors } = require('celebrate');
 
 const { userRouter } = require('./routes/users');
 const { cardsRouter } = require('./routes/cards');
-const { NOT_FOUND_CODE } = require('./utils/errorCodes');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { loginValidator, registerValidator } = require('./utils/validators');
 const globalHandler = require('./utils/globalHandler');
+const NotFoundError = require('./utils/NotFoundError');
 
 const app = express();
 
@@ -23,13 +23,10 @@ app.use(auth);
 app.use('/', userRouter);
 app.use('/', cardsRouter);
 app.use(errors());
-app.use(globalHandler);
-
-app.use((req, res) => {
-  res.status(NOT_FOUND_CODE).send({
-    message: 'Невалидный роут',
-  });
+app.use((req, res, next) => {
+  next(new NotFoundError('Невалидный роут'));
 });
+app.use(globalHandler);
 
 const { PORT = 3000 } = process.env;
 

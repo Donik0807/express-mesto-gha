@@ -84,7 +84,7 @@ const dislikeCard = (req, res, next) => {
     .catch((err) => {
       let customError = err;
       if (err.name === 'CastError') {
-        customError = new InvalidDataError('Переданы некорректные данные для постановке лайка');
+        customError = new InvalidDataError('Переданы некорректные данные для снятия лайка');
       }
       if (err.name === 'DocumentNotFoundError') {
         customError = new NotFoundError('Карточка не найдена');

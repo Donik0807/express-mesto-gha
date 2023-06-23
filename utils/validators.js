@@ -27,7 +27,7 @@ const registerValidator = {
 
 const getUserValidator = {
   params: Joi.object().keys({
-    userId: Joi.string().required().length(24),
+    userId: Joi.string().required().hex(),
   }),
 };
 
@@ -51,9 +51,9 @@ const createCardValidator = {
   },
 };
 
-const likedeleteValidator = {
+const idValidator = {
   params: Joi.object().keys({
-    cardId: Joi.string().required().length(24),
+    cardId: Joi.string().required().hex(),
   }),
 };
 
@@ -64,5 +64,5 @@ module.exports = {
   updateUserValidator,
   updateAvatarValidator,
   createCardValidator,
-  likedeleteValidator,
+  idValidator,
 };

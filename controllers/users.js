@@ -30,14 +30,8 @@ const getUser = (req, res, next) => {
 };
 
 const createUser = (req, res, next) => {
-  const { password, email } = req.body;
-  User.findOne({ email }).then((user) => {
-    if (user) {
-      return Promise.reject(new ConflictError('Пользователь с таким email уже существует'));
-    }
-    return user;
-  })
-    .then(() => bcrypt.hash(password, 10))
+  const { password } = req.body;
+  bcrypt.hash(password, 10)
     .then((hash) => User.create({ ...req.body, password: hash }))
     .then((user) => {
       const { _doc } = user;
@@ -48,6 +42,9 @@ const createUser = (req, res, next) => {
       let customError = err;
       if (err.name === 'ValidationError') {
         customError = new InvalidDataError('Переданы неверные данные');
+      }
+      if (err.name === 'MongoServerError') {
+        customError = new ConflictError('Пользователь с таким email уже существует');
       }
       next(customError);
     });
