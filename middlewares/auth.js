@@ -6,6 +6,7 @@ const auth = (req, res, next) => {
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
     next(new AuthError('Необходима авторизация'));
+    return;
   }
 
   const token = authorization.replace('Bearer ', '');
@@ -15,6 +16,7 @@ const auth = (req, res, next) => {
     payload = jsonwebtoken.verify(token, 'some-secret-key');
   } catch (err) {
     next(new AuthError('Необходима авторизация'));
+    return;
   }
   req.user = payload;
   next();

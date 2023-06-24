@@ -27,7 +27,7 @@ const registerValidator = {
 
 const getUserValidator = {
   params: Joi.object().keys({
-    userId: Joi.string().required().hex(),
+    userId: Joi.string().required().hex().length(24),
   }),
 };
 
@@ -53,7 +53,7 @@ const createCardValidator = {
 
 const idValidator = {
   params: Joi.object().keys({
-    cardId: Joi.string().required().hex(),
+    cardId: Joi.string().required().hex().length(24),
   }),
 };
 
