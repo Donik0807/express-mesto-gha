@@ -34,11 +34,11 @@ app.post('/signup', celebrate(registerValidator), createUser);
 app.use(auth);
 app.use('/', userRouter);
 app.use('/', cardsRouter);
-app.use(errorLogger);
-app.use(errors());
 app.use((req, res, next) => {
   next(new NotFoundError('Невалидный роут'));
 });
+app.use(errorLogger);
+app.use(errors());
 app.use(globalHandler);
 
 const { PORT = 3000 } = process.env;

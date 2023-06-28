@@ -59,7 +59,7 @@ const updateUser = (req, res, next) => {
     .catch((err) => {
       let customError = err;
 
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         customError = new InvalidDataError('Переданы некорректные данные при обновлении профиля');
       }
 
@@ -124,9 +124,6 @@ const getMe = (req, res, next) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       let customError = err;
-      if (err.name === 'CastError') {
-        customError = new InvalidDataError('Переданы некорректные данные пользователя');
-      }
       if (err.name === 'DocumentNotFoundError') {
         customError = new NotFoundError('Пользователь не найден');
       }
