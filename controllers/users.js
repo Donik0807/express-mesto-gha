@@ -6,6 +6,8 @@ const AuthError = require('../utils/AuthError');
 const InvalidDataError = require('../utils/InvalidDataError');
 const NotFoundError = require('../utils/NotFoundError');
 
+const { NODE_ENV, JWT_SECRET } = process.env;
+
 const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
@@ -96,7 +98,9 @@ const login = (req, res, next) => {
         if (!matched) {
           return Promise.reject(new AuthError('Неправильная почта или пароль'));
         }
-        const token = jsonwebtoken.sign({ _id: user._id }, 'some-secret-key', {
+        const token = jsonwebtoken.sign({ _id: user._id }, NODE_ENV === 'production'
+          ? JWT_SECRET
+          : 'some-secret-key', {
           expiresIn: '7d',
         });
 
