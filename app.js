@@ -24,6 +24,11 @@ app.use(requestLogger);
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(bodyParser.json());
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
 app.post('/signin', celebrate(loginValidator), login);
 app.post('/signup', celebrate(registerValidator), createUser);
 app.use(auth);

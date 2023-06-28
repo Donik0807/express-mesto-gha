@@ -1,5 +1,5 @@
 const corsOptions = {
-  origin: ['http://localhost:3001'],
+  origin: ['http://mesto.front.nomoreparties.sbs', 'https://mesto.front.nomoreparties.sbs'],
 };
 
 module.exports = corsOptions;
